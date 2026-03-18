@@ -13,10 +13,25 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
-const db = getFirestore(app);
-const auth = getAuth(app);
+// Check if Firebase is configured
+const isConfigured = Object.values(firebaseConfig).every(val => val);
 
-export { app, analytics, db, auth };
+let app = null;
+let analytics = null;
+let db = null;
+let auth = null;
+
+if (isConfigured) {
+    try {
+        app = initializeApp(firebaseConfig);
+        analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
+        db = getFirestore(app);
+        auth = getAuth(app);
+    } catch (error) {
+        console.warn('[Firebase] Initialization error:', error.message);
+    }
+} else {
+    console.warn('[Firebase] Firebase not configured. Set VITE_FIREBASE_* environment variables in .env file.');
+}
+
+export { app, analytics, db, auth, isConfigured };
